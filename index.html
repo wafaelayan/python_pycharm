@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Python IDE - Grade 10</title>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/python/python.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
+<style>
+:root{color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html,body{height:100%;background:#111827;-webkit-text-size-adjust:100%}html{height:100dvh}#file-list li{flex-shrink:0}
+/* CodeMirror core + Dracula (inlined: external stylesheets are blocked) */
+.CodeMirror{position:relative;overflow:hidden;height:100%;background:#282a36;color:#f8f8f2;font-family:Consolas,'Courier New',monospace;font-size:16px;direction:ltr;text-align:left;line-height:1.4}
+.CodeMirror-scroll{overflow:scroll!important;margin-bottom:-50px;margin-right:-50px;padding-bottom:50px;height:100%;outline:none;position:relative}
+.CodeMirror-sizer{position:relative;border-right:50px solid transparent}
+.CodeMirror-vscrollbar,.CodeMirror-hscrollbar,.CodeMirror-scrollbar-filler,.CodeMirror-gutter-filler{position:absolute;z-index:6;display:none;outline:none}
+.CodeMirror-vscrollbar{right:0;top:0;overflow-x:hidden;overflow-y:scroll}
+.CodeMirror-hscrollbar{bottom:0;left:0;overflow-y:hidden;overflow-x:scroll}
+.CodeMirror-scrollbar-filler{right:0;bottom:0}
+.CodeMirror-gutters{position:absolute;left:0;top:0;min-height:100%;z-index:3;background:#282a36;border-right:0}
+.CodeMirror-gutter{white-space:normal;height:100%;display:inline-block;vertical-align:top;margin-bottom:-50px}
+.CodeMirror-gutter-wrapper{position:absolute;z-index:4;background:none!important;border:none!important}
+.CodeMirror-gutter-background{position:absolute;top:0;bottom:0;z-index:4}
+.CodeMirror-gutter-elt{position:absolute;cursor:default;z-index:4}
+.CodeMirror-lines{cursor:text;min-height:1px}
+.CodeMirror pre{border-radius:0;border-width:0;background:transparent;font-family:inherit;font-size:inherit;margin:0;white-space:pre;word-wrap:normal;line-height:inherit;color:inherit;z-index:2;position:relative;overflow:visible}
+.CodeMirror-code{outline:none}
+.CodeMirror-measure{position:absolute;width:100%;height:0;overflow:hidden;visibility:hidden}
+.CodeMirror-cursor{position:absolute;pointer-events:none;border-left:1px solid #f8f8f0;width:0}
+.CodeMirror-linenumber{padding:0 3px 0 5px;min-width:20px;text-align:right;color:#6d8a88;white-space:nowrap}
+.CodeMirror-selected{background:#44475a}
+.CodeMirror-activeline-background{background:#44475a}
+.cm-keyword,.cm-operator{color:#ff79c6}.cm-number,.cm-atom{color:#bd93f9}.cm-string,.cm-string-2{color:#f1fa8c}
+.cm-comment{color:#6272a4}.cm-builtin,.cm-def{color:#50fa7b}.cm-variable-2,.cm-variable-3{color:#8be9fd}.cm-error{color:#f55}
+#output{white-space:pre-wrap;font-family:Consolas,'Courier New',monospace;direction:ltr;text-align:left}
+</style>
+</head>
+<body class="text-gray-100 flex flex-col font-sans overflow-hidden" style="height:100%">
+<header class="bg-gray-800 border-b border-gray-700 p-3 flex justify-between items-center z-10">
+  <div class="flex items-center space-x-3 space-x-reverse">
+    <svg class="w-6 h-6 text-blue-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8zm1-13h-2v4H7v2h4v4h2v-4h4v-2h-4V7z"/></svg>
+    <h1 class="text-sm sm:text-lg font-bold leading-tight">بيئة بايثون التفاعلية - مشروع الصف العاشر</h1>
+  </div>
+  <button id="run-btn" class="bg-green-600 hover:bg-green-500 text-white px-3 sm:px-5 py-2 text-sm sm:text-base rounded font-bold flex items-center shrink-0 mr-2 space-x-2 space-x-reverse transition">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    <span>تشغيل الكود (Run)</span>
+  </button>
+</header>
+
+<div class="flex flex-col sm:flex-row flex-1 overflow-hidden min-h-0">
+  <aside class="w-full sm:w-64 shrink-0 bg-gray-800 border-b sm:border-b-0 sm:border-l border-gray-700 flex flex-col z-10">
+    <div class="hidden sm:block p-3 uppercase text-xs font-bold text-gray-400 tracking-wider">ملفات المشروع</div>
+    <ul id="file-list" class="flex flex-row sm:flex-col overflow-x-auto sm:overflow-x-hidden sm:overflow-y-auto sm:flex-1"></ul>
+  </aside>
+
+  <main class="flex-1 flex flex-col min-w-0">
+    <div class="flex-1 relative min-h-0"><div id="editor-container" class="absolute inset-0"></div></div>
+    <div class="h-44 sm:h-72 shrink-0 bg-black flex flex-col border-t-4 border-gray-700">
+      <div class="bg-gray-800 px-4 py-2 text-sm font-semibold text-gray-300 border-b border-gray-700 flex justify-between items-center">
+        <span>المخرجات (Console)</span>
+        <button id="clear-btn" class="text-xs bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded">مسح (Clear)</button>
+      </div>
+      <div id="output" class="flex-1 p-4 overflow-y-auto text-green-400 text-sm"></div>
+      <div id="input-container" class="hidden flex items-center p-2 bg-gray-800 border-t border-gray-600">
+        <input type="text" id="console-input" class="flex-1 min-w-0 text-base bg-black text-green-400 px-3 py-1.5 border border-gray-500 rounded focus:outline-none focus:border-blue-500 text-left font-mono" dir="ltr" autocomplete="off" placeholder="..." />
+        <button id="submit-input" class="mr-3 bg-blue-600 hover:bg-blue-500 px-4 py-1.5 rounded text-sm text-white font-bold transition">إدخال (Enter)</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+const H = "###### مشروع الصف العاشر - الفصل الأول ######\n\n";
+const initialFiles = {
+"String.py": H + `#إنشاء سلسلة نصية باسم school واجعلي قيمتها “moudi”
+school=
+
+#أطبعي الحرف الأول من السلسلة النصية country
+country= "Kuwait"
+print(         )
+
+#كرري الرمز $ عدد 7 مرات باستخدام معامل الضرب *
+print(         )
+
+######################################
+Kuwait= 'My Country is KUWAIT'
+
+#أطبعي طول السلسلة النصية Kuwait
+print(        )
+
+# أطبعي قيمة السلسلة النصية Kuwait بأحرف صغيرة
+print(         )
+
+#أطبعي قيمة السلسلة النصية Kuwait بأحرف كبيرة
+print(         )
+
+#حولي الحرف الأول من قيمة السلسلة النصية Kuwait لحرف كبير
+print(         )
+`,
+"Conditions.py": H + `grade= float(input('enter the student grade: '))
+
+
+# الشرط الأول في حال كانت درجة الطالب أكبر من أو تساوي 90
+   grade >= 90:   ##
+    print ('excellent')
+
+# الشرط الثاني في حال كانت درجة الطالب أصغر من أو تساوي 50
+   grade <= 50:  ##
+    print('try agin')
+# الشرط البديل في حال كانت درجة الطالب غير ذلك
+                ##
+    print('enter number between 100 and 0')
+`,
+"Loops.py": H + `color = ''
+number = input('Enter number: ')
+
+#  الحلقة التكرارية Black في حال كان النص color  يساوي
+       color == "black": ##
+    color = input('enter your color')
+    print('you are right')
+
+
+#اطبعي الأعداد الزوجية باستخدام الحلقة التكرارية الغير محدودة لتتجاوز القيمة ((فردياً)) اذا كان باقي القسمة على العدد 2 هو 1
+for i in range(1, 11):
+    if i % 2 != 0:
+              # قم بتخطي طباعة هذا الرقم الفردي وانتقل إلى التكرار التالي
+    print(i)
+
+
+#الحلقة التكرارية for في حال كان العدد number المدخل في الأعداد من 1 إلى 7
+for number in          :  ##
+    print('yes it is')
+else:
+    print('try agin')
+
+
+#للخروج من الحلقة التكرارية (((فوراً))) عندما تصل القيمة إلى 5
+for i in range(1, 10):
+    if i == 5:
+           # يتم الخروج من الحلقة فوراً
+    print(i)
+`,
+"Exceptions.py": H + `
+#صححي الأخطاء المختلفة في التعليمات التالية
+
+x= 1
+if x >0
+  print(x))
+else
+print(“try again”
+
+#######################################
+
+x= 1
+y= 7
+print(y/0)
+print(z)
+letter=int(“abc”)
+`,
+"Variables.py": H + `#استقبلي الاسم من المستخدم ويحفظه في المتغير name
+name=     ("Enter your name")
+
+#اطبعي العبارة (Grade 10) على الشاشة
+     ("Grade 10")
+`
+};
+
+let files = {...initialFiles};
+let currentFile = "String.py";
+
+const editor = CodeMirror(document.getElementById("editor-container"), {
+  mode: "python", lineNumbers: true, indentUnit: 4, matchBrackets: true, value: files[currentFile]
+});
+
+const fileListEl = document.getElementById("file-list");
+const outputEl = document.getElementById("output");
+const runBtn = document.getElementById("run-btn");
+const clearBtn = document.getElementById("clear-btn");
+const inputContainer = document.getElementById("input-container");
+const consoleInput = document.getElementById("console-input");
+const submitInputBtn = document.getElementById("submit-input");
+
+function renderFiles() {
+  fileListEl.innerHTML = "";
+  Object.keys(files).forEach(filename => {
+    const li = document.createElement("li");
+    const btn = document.createElement("button");
+    btn.className = "w-full whitespace-nowrap text-right px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base flex items-center hover:bg-gray-700 transition " +
+      (currentFile === filename ? "bg-gray-700 border-b-4 sm:border-b-0 sm:border-r-4 border-blue-500 text-white" : "text-gray-400");
+    btn.innerHTML = '<svg class="w-4 h-4 ml-2 text-yellow-400 shrink-0" viewBox="0 0 128 128"><path fill="currentColor" d="M64 5.378c-28.75 0-32.32 12.39-32.32 12.39l.03 12.65h33.02v4.6H31.11S14 34.02 14 62.46c0 28.45 14.65 31.25 14.65 31.25h13.98v-19.6s-.37-13.62 13.34-13.62h20.6s13.34-1.28 13.34-14.73v-19.9s1.46-20.48-25.91-20.48zM49.6 19.34a4.4 4.4 0 1 1-8.8.01 4.4 4.4 0 0 1 8.8-.01zM79.28 35.85s-20.6.21-20.6 15v19.46s.36 13.06-13.34 13.06H23.95s-1.8 19.44 26.68 19.44c28.5 0 32.74-12.72 32.74-12.72l-.04-13.02H49.9v-4.5h34.02s17.11 1 17.11-27.46c0-28.45-14.65-31.25-14.65-31.25h-13.1v19.6s.4 13.78-14 13.78zM87.2 108.64a4.4 4.4 0 1 1-8.8.01 4.4 4.4 0 0 1 8.8-.01z"/></svg><span dir="ltr"></span>';
+    btn.lastChild.textContent = filename;
+    btn.onclick = () => switchFile(filename);
+    li.appendChild(btn);
+    fileListEl.appendChild(li);
+  });
+}
+
+function switchFile(filename) {
+  files[currentFile] = editor.getValue();
+  currentFile = filename;
+  editor.setValue(files[currentFile]);
+  renderFiles();
+}
+renderFiles();
+
+clearBtn.onclick = () => { outputEl.textContent = ""; };
+
+function outf(text) {
+  outputEl.textContent += text;
+  outputEl.scrollTop = outputEl.scrollHeight;
+}
+
+function builtinRead(x) {
+  if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
+    throw "File not found: '" + x + "'";
+  return Sk.builtinFiles["files"][x];
+}
+
+let inputResolve = null;
+function submitInput() {
+  if (inputResolve) {
+    const val = consoleInput.value;
+    inputContainer.classList.add("hidden");
+    outf(val + "\n");
+    const resolve = inputResolve;
+    inputResolve = null;
+    resolve(val);
+  }
+}
+consoleInput.addEventListener("keypress", e => { if (e.key === "Enter") submitInput(); });
+submitInputBtn.addEventListener("click", submitInput);
+
+runBtn.onclick = function () {
+  files[currentFile] = editor.getValue();
+  const code = editor.getValue();
+  outf("\n>>> جاري تشغيل " + currentFile + "...\n");
+  inputContainer.classList.add("hidden");
+
+  Sk.configure({
+    output: outf,
+    read: builtinRead,
+    inputfun: function (prompt) {
+      return new Promise(function (resolve) {
+        outf(prompt);
+        consoleInput.value = "";
+        inputContainer.classList.remove("hidden");
+        consoleInput.focus();
+        inputResolve = resolve;
+      });
+    }
+  });
+
+  // Replace curly quotes (common when copy-pasting from Word/Arabic keyboards)
+  const cleanCode = code.replace(/[“”]/g, '"').replace(/[‘’]/g, "'");
+
+  Sk.misceval.asyncToPromise(function () {
+    return Sk.importMainWithBody("<stdin>", false, cleanCode, true);
+  }).then(
+    function () { outf("\n--- اكتمل التنفيذ بنجاح ---"); },
+    function (err) { outf("\nخطأ (Error):\n" + err.toString()); }
+  );
+};
+</script>
+</body>
+</html>
